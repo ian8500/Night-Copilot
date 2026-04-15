@@ -15,27 +15,28 @@ struct GuidanceView: View {
                 primaryButton
             }
             .padding(Spacing.large)
+            .padding(.bottom, Spacing.xLarge)
         }
         .background(LinearGradient.appBackground.ignoresSafeArea())
         .navigationTitle(viewModel.plan.nightState.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Ask Copilot") {
+                Button("Open Copilot") {
                     isShowingCopilot = true
                 }
                 .font(Typography.caption.weight(.semibold))
-                .foregroundStyle(Color.mutedIndigo)
+                .foregroundStyle(Color.accentGlow)
             }
         }
         .sheet(item: $activeTool) { tool in
             ResetTimerView(viewModel: ResetTimerViewModel(tool: tool))
-                .presentationDetents([.fraction(0.8)])
+                .presentationDetents([.fraction(0.82)])
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $isShowingPrompt) {
             promptSheet
-                .presentationDetents([.height(280)])
+                .presentationDetents([.height(300)])
         }
         .navigationDestination(isPresented: $isShowingCopilot) {
             AIChatView(
@@ -52,13 +53,13 @@ struct GuidanceView: View {
     private var titleBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
-                Text(viewModel.plan.nightState.title)
-                    .font(Typography.title)
-                    .foregroundStyle(.white)
+                Text("Plan for right now")
+                    .font(Typography.sectionLabel)
+                    .foregroundStyle(Color.secondaryText)
 
                 Text(viewModel.plan.nightState.openingLine)
                     .font(Typography.body)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(.white)
             }
         }
     }
@@ -66,11 +67,15 @@ struct GuidanceView: View {
     private var stepsBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
+                Text("Steady next steps")
+                    .font(Typography.sectionLabel)
+                    .foregroundStyle(Color.secondaryText)
+
                 ForEach(Array(viewModel.plan.steps.enumerated()), id: \.offset) { index, step in
                     HStack(alignment: .top, spacing: Spacing.small) {
                         Text("\(index + 1).")
                             .font(Typography.body.weight(.semibold))
-                            .foregroundStyle(Color.mutedIndigo)
+                            .foregroundStyle(Color.accentGlow)
 
                         Text(step)
                             .font(Typography.body)
@@ -85,8 +90,8 @@ struct GuidanceView: View {
     private var quickActionsBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
-                Text("Quick actions")
-                    .font(Typography.caption.weight(.semibold))
+                Text("Shortcuts")
+                    .font(Typography.sectionLabel)
                     .foregroundStyle(Color.secondaryText)
 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -107,7 +112,7 @@ struct GuidanceView: View {
             activeTool = viewModel.plan.primaryTool
         } label: {
             Text(viewModel.plan.primaryActionTitle)
-                .font(Typography.body.weight(.semibold))
+                .font(Typography.actionButton)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.medium)
@@ -122,7 +127,7 @@ struct GuidanceView: View {
 
     private var promptSheet: some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
-            Text("Calming prompt")
+            Text("Grounding prompt")
                 .font(Typography.cardTitle)
                 .foregroundStyle(.white)
 
@@ -133,8 +138,8 @@ struct GuidanceView: View {
             Button("Show another") {
                 viewModel.cyclePrompt()
             }
-            .font(Typography.body.weight(.semibold))
-            .foregroundStyle(Color.mutedIndigo)
+            .font(Typography.actionButton)
+            .foregroundStyle(Color.accentGlow)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(Spacing.large)

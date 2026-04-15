@@ -7,16 +7,16 @@ struct QuickActionChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(Typography.caption.weight(.medium))
+                .font(Typography.caption.weight(.semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, Spacing.medium)
-                .padding(.vertical, Spacing.small)
+                .padding(.vertical, 10)
                 .background(
                     Capsule(style: .continuous)
                         .fill(Color.white.opacity(0.08))
                         .overlay(
                             Capsule(style: .continuous)
-                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                                .stroke(Color.white.opacity(0.16), lineWidth: 1)
                         )
                 )
         }
