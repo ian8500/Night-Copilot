@@ -11,11 +11,14 @@ struct GuidancePlan: Identifiable {
     struct QuickAction: Identifiable {
         let id = UUID()
         let title: String
+        let subtitle: String
+        let access: TierAccess
         let action: ActionType
 
         enum ActionType {
             case startTool(ResetTool)
             case readPrompt
+            case openPremiumPreview
         }
     }
 
@@ -30,8 +33,9 @@ struct GuidancePlan: Identifiable {
                     "If sleep does not return, switch to a quiet reset rather than getting frustrated."
                 ],
                 quickActions: [
-                    .init(title: "Start breathing timer", action: .startTool(.breathing1m)),
-                    .init(title: "Read a calm prompt", action: .readPrompt)
+                    .init(title: "Start breathing timer", subtitle: "1 minute", access: .free, action: .startTool(.breathing1m)),
+                    .init(title: "Read a calm prompt", subtitle: "Ground now", access: .free, action: .readPrompt),
+                    .init(title: "Sleep return script", subtitle: "8-minute guided session", access: .premium, action: .openPremiumPreview)
                 ],
                 primaryActionTitle: "Start quiet reset",
                 primaryTool: .quiet5m
@@ -45,8 +49,9 @@ struct GuidancePlan: Identifiable {
                     "Let your system step down gradually instead of trying to crash into sleep."
                 ],
                 quickActions: [
-                    .init(title: "Start 10-minute wind-down", action: .startTool(.windDown10m)),
-                    .init(title: "Read recovery steps", action: .readPrompt)
+                    .init(title: "Start 10-minute wind-down", subtitle: "Core tool", access: .free, action: .startTool(.windDown10m)),
+                    .init(title: "Read recovery steps", subtitle: "Keep it simple", access: .free, action: .readPrompt),
+                    .init(title: "After-work decompression", subtitle: "Structured unwind", access: .premium, action: .openPremiumPreview)
                 ],
                 primaryActionTitle: "Begin wind-down",
                 primaryTool: .windDown10m
@@ -60,8 +65,9 @@ struct GuidancePlan: Identifiable {
                     "Do the smallest helpful action first."
                 ],
                 quickActions: [
-                    .init(title: "Start 60-second reset", action: .startTool(.reset60)),
-                    .init(title: "Read grounding prompt", action: .readPrompt)
+                    .init(title: "Start 60-second reset", subtitle: "Fast relief", access: .free, action: .startTool(.reset60)),
+                    .init(title: "Read grounding prompt", subtitle: "Steady your thoughts", access: .free, action: .readPrompt),
+                    .init(title: "Overload recovery plan", subtitle: "5-step guide", access: .premium, action: .openPremiumPreview)
                 ],
                 primaryActionTitle: "Start reset",
                 primaryTool: .reset60
@@ -75,8 +81,9 @@ struct GuidancePlan: Identifiable {
                     "Follow one short reset instead of trying to fix everything."
                 ],
                 quickActions: [
-                    .init(title: "Start 5-minute reset", action: .startTool(.quiet5m)),
-                    .init(title: "Read a calming prompt", action: .readPrompt)
+                    .init(title: "Start 5-minute reset", subtitle: "Core tool", access: .free, action: .startTool(.quiet5m)),
+                    .init(title: "Read a calming prompt", subtitle: "Reset focus", access: .free, action: .readPrompt),
+                    .init(title: "Night reflection", subtitle: "Guided journal", access: .premium, action: .openPremiumPreview)
                 ],
                 primaryActionTitle: "Start 5-minute reset",
                 primaryTool: .quiet5m

@@ -5,6 +5,7 @@ struct GuidanceView: View {
     @State private var activeTool: ResetTool?
     @State private var isShowingPrompt = false
     @State private var isShowingCopilot = false
+    @State private var isShowingPremiumSheet = false
 
     var body: some View {
         ScrollView {
@@ -38,6 +39,13 @@ struct GuidanceView: View {
             promptSheet
                 .presentationDetents([.height(300)])
         }
+        .sheet(isPresented: $isShowingPremiumSheet) {
+            PremiumTierSheet(
+                title: "Night Copilot Plus",
+                subtitle: "Preview deeper recovery sessions while your free nighttime essentials stay available."
+            )
+            .presentationDetents([.medium, .large])
+        }
         .navigationDestination(isPresented: $isShowingCopilot) {
             AIChatView(
                 viewModel: AIChatViewModel(
@@ -67,7 +75,7 @@ struct GuidanceView: View {
     private var stepsBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                Text("Steady next steps")
+                Text("Steady next steps (Free)")
                     .font(Typography.sectionLabel)
                     .foregroundStyle(Color.secondaryText)
 
@@ -97,7 +105,11 @@ struct GuidanceView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: Spacing.small) {
                         ForEach(viewModel.plan.quickActions) { quickAction in
-                            QuickActionChip(title: quickAction.title) {
+                            QuickActionChip(
+                                title: quickAction.title,
+                                subtitle: quickAction.subtitle,
+                                access: quickAction.access
+                            ) {
                                 handleQuickAction(quickAction.action)
                             }
                         }
@@ -152,6 +164,8 @@ struct GuidanceView: View {
             activeTool = tool
         case .readPrompt:
             isShowingPrompt = true
+        case .openPremiumPreview:
+            isShowingPremiumSheet = true
         }
     }
 }
