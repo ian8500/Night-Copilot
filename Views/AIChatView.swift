@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AIChatView: View {
     @StateObject var viewModel: AIChatViewModel
+    @State private var isShowingPremiumSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -37,18 +38,37 @@ struct AIChatView: View {
         .background(LinearGradient.appBackground.ignoresSafeArea())
         .navigationTitle("AI Copilot")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isShowingPremiumSheet) {
+            PremiumTierSheet(
+                title: "Night Copilot Plus",
+                subtitle: "Preview deeper Copilot sessions and personalization. Calm support stays available in Free."
+            )
+            .presentationDetents([.medium, .large])
+        }
     }
 
     private var trustBanner: some View {
-        HStack(spacing: Spacing.small) {
-            Image(systemName: "checkmark.shield")
+        VStack(spacing: 6) {
+            HStack(spacing: Spacing.small) {
+                Image(systemName: "checkmark.shield")
+                    .foregroundStyle(Color.accentGlow)
+
+                Text("Calm Copilot Free: private, judgment-free support for tonight.")
+                    .font(Typography.caption.weight(.semibold))
+                    .foregroundStyle(Color.secondaryText)
+
+                Spacer()
+            }
+
+            HStack {
+                Button("Preview Plus features") {
+                    isShowingPremiumSheet = true
+                }
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .foregroundStyle(Color.accentGlow)
 
-            Text("Private, judgment-free guidance for tonight.")
-                .font(Typography.caption.weight(.semibold))
-                .foregroundStyle(Color.secondaryText)
-
-            Spacer()
+                Spacer()
+            }
         }
         .padding(.horizontal, Spacing.medium)
         .padding(.vertical, Spacing.small)
@@ -132,7 +152,7 @@ struct AIChatView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xSmall) {
                 ForEach(viewModel.quickReplies, id: \.self) { quickReply in
-                    QuickActionChip(title: quickReply) {
+                    QuickActionChip(title: quickReply, subtitle: "Quick reply") {
                         Task { await viewModel.send(quickReply) }
                     }
                 }
