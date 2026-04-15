@@ -12,13 +12,17 @@ struct NightCard<Content: View>: View {
             .padding(Spacing.large)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
                     .fill(Color.cardBackground)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .fill(LinearGradient.heroGlow)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .stroke(Color.cardStroke, lineWidth: 1)
                     )
-                    .shadow(color: .black.opacity(0.24), radius: 14, y: 8)
+                    .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
             )
     }
 }

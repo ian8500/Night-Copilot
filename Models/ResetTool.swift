@@ -11,11 +11,11 @@ enum ResetTool: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .reset60:
-            return "60-second reset"
+            return "60-second pause"
         case .breathing1m:
             return "1-minute breathing"
         case .quiet5m:
-            return "5-minute quiet reset"
+            return "5-minute quiet"
         case .windDown10m:
             return "10-minute wind-down"
         }
@@ -35,13 +35,13 @@ enum ResetTool: String, CaseIterable, Identifiable {
     var guidanceText: String {
         switch self {
         case .reset60:
-            return "One minute. Fewer choices. Slower breathing."
+            return "One minute. Fewer decisions. Slower breathing."
         case .breathing1m:
-            return "Inhale gently, exhale longer, and let your body soften."
+            return "Inhale gently, exhale longer, and let your shoulders soften."
         case .quiet5m:
-            return "No fixing. Just a quiet pause for five minutes."
+            return "No solving for now. Just five quiet minutes to settle."
         case .windDown10m:
-            return "Reduce input and let your nervous system step down."
+            return "Lower stimulation and give your nervous system room to power down."
         }
     }
 }

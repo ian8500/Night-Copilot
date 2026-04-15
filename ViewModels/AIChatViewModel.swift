@@ -7,11 +7,11 @@ final class AIChatViewModel: ObservableObject {
     @Published var isSending = false
 
     let quickReplies = [
-        "What should I do first?",
-        "Give me the short version",
-        "What if that doesn’t work?",
-        "Help me calm down",
-        "Start a reset"
+        "What’s the next best step?",
+        "Keep this very short",
+        "I need something calming",
+        "What if this doesn’t help?",
+        "Start a reset timer"
     ]
 
     private let context: CopilotContext
@@ -22,7 +22,7 @@ final class AIChatViewModel: ObservableObject {
         self.context = context
         self.chatService = chatService
 
-        let welcome = "I’m here with calm, practical guidance. Share what feels hardest right now."
+        let welcome = "I’m here with calm, practical support. Tell me what feels hardest right now, and we’ll take one step at a time."
         messages = [AIChatMessage(role: .assistant, text: welcome)]
     }
 

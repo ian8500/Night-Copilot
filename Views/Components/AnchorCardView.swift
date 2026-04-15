@@ -6,8 +6,8 @@ struct AnchorCardView: View {
     var body: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
-                Text("Tonight’s anchor")
-                    .font(Typography.caption.weight(.semibold))
+                Text("Tonight’s grounding line")
+                    .font(Typography.sectionLabel)
                     .foregroundStyle(Color.secondaryText)
 
                 Text(prompt.text)

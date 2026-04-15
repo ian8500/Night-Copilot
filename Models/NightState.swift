@@ -11,13 +11,26 @@ enum NightState: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .cantSleep:
-            return "Can’t sleep"
+            return "Can’t fall asleep"
         case .wiredAfterWork:
-            return "Wired after work"
+            return "Still wired"
         case .feelingOverwhelmed:
-            return "Feeling overwhelmed"
+            return "Feeling overloaded"
         case .needToReset:
-            return "Need to reset"
+            return "Need a reset"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .cantSleep:
+            return "When your mind will not switch off"
+        case .wiredAfterWork:
+            return "When your body is still in go-mode"
+        case .feelingOverwhelmed:
+            return "When everything feels too loud"
+        case .needToReset:
+            return "When you need a clean pause"
         }
     }
 
@@ -37,13 +50,13 @@ enum NightState: String, CaseIterable, Identifiable {
     var openingLine: String {
         switch self {
         case .cantSleep:
-            return "You do not need to force sleep right now. Focus on settling first."
+            return "You do not need to force sleep. We will settle your system first."
         case .wiredAfterWork:
-            return "Your body may still be in go-mode. Let’s reduce the signals telling it to stay switched on."
+            return "Your body is protecting momentum. We can gently signal that the day is over."
         case .feelingOverwhelmed:
-            return "You only need one small next step right now."
+            return "You only need one steady next step right now."
         case .needToReset:
-            return "Let’s make the next few minutes simpler."
+            return "Let’s simplify the next few minutes and breathe room back in."
         }
     }
 }

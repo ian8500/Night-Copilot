@@ -3,34 +3,45 @@ import SwiftUI
 struct ResetTimerView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject var viewModel: ResetTimerViewModel
+    @State private var animateBreath = false
 
     var body: some View {
-        VStack(spacing: Spacing.large) {
-            Text(viewModel.tool.title)
-                .font(Typography.cardTitle)
-                .foregroundStyle(.white)
+        VStack(spacing: Spacing.xLarge) {
+            VStack(spacing: Spacing.small) {
+                Text(viewModel.tool.title)
+                    .font(Typography.sectionTitle)
+                    .foregroundStyle(.white)
 
-            Text(viewModel.tool.guidanceText)
-                .font(Typography.body)
-                .foregroundStyle(Color.secondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, Spacing.large)
+                Text(viewModel.tool.guidanceText)
+                    .font(Typography.body)
+                    .foregroundStyle(Color.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, Spacing.large)
+            }
 
             ZStack {
-                ProgressRingView(progress: viewModel.progress)
-                Text(TimeFormatter.mmss(from: viewModel.remaining))
-                    .font(Typography.timer)
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-            }
-            .padding(.vertical, Spacing.small)
+                ProgressRingView(progress: viewModel.progress, isAnimating: viewModel.isRunning)
 
-            HStack(spacing: Spacing.small) {
-                timerControl(title: viewModel.isRunning ? "Pause" : "Start", primary: true) {
+                VStack(spacing: Spacing.xxSmall) {
+                    Text(TimeFormatter.mmss(from: viewModel.remaining))
+                        .font(Typography.timer)
+                        .foregroundStyle(.white)
+                        .monospacedDigit()
+
+                    Text(viewModel.isRunning ? "steady pace" : "ready when you are")
+                        .font(Typography.caption.weight(.semibold))
+                        .foregroundStyle(Color.secondaryText)
+                }
+            }
+            .scaleEffect(animateBreath ? 1.01 : 0.99)
+            .animation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true), value: animateBreath)
+
+            VStack(spacing: Spacing.small) {
+                timerControl(title: viewModel.isRunning ? "Pause" : "Begin", primary: true) {
                     viewModel.isRunning ? viewModel.pause() : viewModel.start()
                 }
 
-                timerControl(title: "Cancel", primary: false) {
+                timerControl(title: "Reset", primary: false) {
                     viewModel.cancel()
                 }
             }
@@ -40,24 +51,31 @@ struct ResetTimerView: View {
             }
             .font(Typography.caption.weight(.semibold))
             .foregroundStyle(Color.secondaryText)
-            .padding(.top, Spacing.xSmall)
 
             Spacer(minLength: 0)
         }
         .padding(Spacing.large)
+        .padding(.top, Spacing.medium)
         .background(LinearGradient.appBackground.ignoresSafeArea())
+        .onAppear {
+            animateBreath = true
+        }
     }
 
     private func timerControl(title: String, primary: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(Typography.body.weight(.semibold))
+                .font(Typography.actionButton)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.medium)
                 .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(primary ? Color.mutedIndigo : Color.white.opacity(0.12))
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(primary ? Color.mutedIndigo : Color.white.opacity(0.10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color.white.opacity(primary ? 0 : 0.16), lineWidth: 1)
+                        )
                 )
         }
         .buttonStyle(.plain)

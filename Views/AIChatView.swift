@@ -5,19 +5,26 @@ struct AIChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            trustBanner
+
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: Spacing.small) {
                         ForEach(viewModel.messages) { message in
                             messageBubble(message)
                                 .id(message.id)
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
+
+                        if viewModel.isSending {
+                            typingIndicator
                         }
                     }
                     .padding(Spacing.medium)
                 }
                 .onChange(of: viewModel.messages.count) {
                     if let lastID = viewModel.messages.last?.id {
-                        withAnimation {
+                        withAnimation(.easeOut(duration: 0.25)) {
                             proxy.scrollTo(lastID, anchor: .bottom)
                         }
                     }
@@ -28,30 +35,97 @@ struct AIChatView: View {
             composer
         }
         .background(LinearGradient.appBackground.ignoresSafeArea())
-        .navigationTitle("Ask Copilot")
+        .navigationTitle("AI Copilot")
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    private var trustBanner: some View {
+        HStack(spacing: Spacing.small) {
+            Image(systemName: "checkmark.shield")
+                .foregroundStyle(Color.accentGlow)
+
+            Text("Private, judgment-free guidance for tonight.")
+                .font(Typography.caption.weight(.semibold))
+                .foregroundStyle(Color.secondaryText)
+
+            Spacer()
+        }
+        .padding(.horizontal, Spacing.medium)
+        .padding(.vertical, Spacing.small)
+        .background(Color.white.opacity(0.04))
+        .overlay(alignment: .bottom) {
+            Divider().background(Color.white.opacity(0.1))
+        }
+    }
+
     private func messageBubble(_ message: AIChatMessage) -> some View {
-        HStack {
-            if message.role == .user { Spacer(minLength: 36) }
+        HStack(alignment: .bottom, spacing: Spacing.xSmall) {
+            if message.role == .user { Spacer(minLength: 32) }
+
+            if message.role != .user {
+                bubbleIcon(for: message.role)
+            }
 
             Text(message.text)
                 .font(Typography.body)
                 .foregroundStyle(.white)
-                .padding(Spacing.medium)
+                .padding(.horizontal, Spacing.medium)
+                .padding(.vertical, Spacing.small)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(backgroundColor(for: message.role))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
                         )
                 )
                 .frame(maxWidth: .infinity, alignment: message.role == .user ? .trailing : .leading)
 
-            if message.role != .user { Spacer(minLength: 36) }
+            if message.role == .user {
+                bubbleIcon(for: .user)
+            }
+
+            if message.role != .user { Spacer(minLength: 32) }
         }
+    }
+
+    private var typingIndicator: some View {
+        HStack {
+            bubbleIcon(for: .assistant)
+
+            HStack(spacing: 5) {
+                ForEach(0..<3) { index in
+                    Circle()
+                        .fill(Color.secondaryText)
+                        .frame(width: 6, height: 6)
+                        .opacity(viewModel.isSending ? 0.45 + (Double(index) * 0.15) : 0.2)
+                }
+            }
+            .padding(.horizontal, Spacing.small)
+            .padding(.vertical, 10)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color.assistantBubble)
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+            )
+
+            Spacer()
+        }
+        .transition(.opacity)
+    }
+
+    private func bubbleIcon(for role: AIChatMessage.Role) -> some View {
+        Image(systemName: role == .user ? "person.fill" : (role == .safety ? "exclamationmark.triangle.fill" : "sparkles"))
+            .font(.system(size: 10, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 22, height: 22)
+            .background(
+                Circle()
+                    .fill(backgroundColor(for: role).opacity(0.95))
+            )
     }
 
     private var quickReplies: some View {
@@ -70,7 +144,7 @@ struct AIChatView: View {
 
     private var composer: some View {
         HStack(spacing: Spacing.small) {
-            TextField("Share what’s happening…", text: $viewModel.inputText, axis: .vertical)
+            TextField("Type a short message…", text: $viewModel.inputText, axis: .vertical)
                 .lineLimit(1...4)
                 .font(Typography.body)
                 .foregroundStyle(.white)
@@ -79,6 +153,10 @@ struct AIChatView: View {
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(Color.white.opacity(0.10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Color.white.opacity(0.14), lineWidth: 1)
+                        )
                 )
 
             Button {
@@ -102,11 +180,11 @@ struct AIChatView: View {
     private func backgroundColor(for role: AIChatMessage.Role) -> Color {
         switch role {
         case .assistant:
-            return Color.cardBackground
+            return Color.assistantBubble
         case .user:
-            return Color.mutedIndigo.opacity(0.45)
+            return Color.userBubble
         case .safety:
-            return Color(red: 0.45, green: 0.17, blue: 0.18).opacity(0.9)
+            return Color.safetyBubble.opacity(0.95)
         }
     }
 }
