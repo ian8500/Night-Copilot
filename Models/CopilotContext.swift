@@ -6,7 +6,7 @@ struct CopilotContext {
     var supportDepth: SupportDepthMode
     var localeIdentifier: String
     var recentPatternSummary: String?
-    var sessionMemory: [SessionMemoryItem]
+    var sessionMemory: CopilotSessionMemory
 
     init(
         nightState: NightState? = nil,
@@ -14,7 +14,7 @@ struct CopilotContext {
         supportDepth: SupportDepthMode = .steady,
         localeIdentifier: String = Locale.current.identifier,
         recentPatternSummary: String? = nil,
-        sessionMemory: [SessionMemoryItem] = []
+        sessionMemory: CopilotSessionMemory = .init()
     ) {
         self.nightState = nightState
         self.currentPrompt = currentPrompt
@@ -23,20 +23,4 @@ struct CopilotContext {
         self.recentPatternSummary = recentPatternSummary
         self.sessionMemory = sessionMemory
     }
-}
-
-struct SessionMemoryItem: Codable, Hashable {
-    let timestamp: Date
-    let userSummary: String
-    let inferredState: InferredSupportState
-}
-
-enum InferredSupportState: String, Codable, Hashable {
-    case activated
-    case exhausted
-    case anxious
-    case lowMood
-    case physicallyTense
-    case recovering
-    case mixed
 }

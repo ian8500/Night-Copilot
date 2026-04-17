@@ -3,37 +3,46 @@ import Foundation
 struct PromptBuilder {
     func buildResponse(userText: String, context: CopilotContext) -> AIChatMessage {
         let inferred = inferState(from: userText)
-        let reflection = reflectionLine(for: userText, inferred: inferred)
-        let body = bodyText(for: inferred, context: context)
-        let handoff = handoff(for: inferred)
+        let action = pickAction(for: inferred, context: context)
 
-        let responseText = [reflection, body, "Next action: \(handoff.rawValue)."].joined(separator: "\n\n")
+        let lines = [
+            "Reflection: \(reflectionLine(for: userText, inferred: inferred))",
+            "Interpretation: \(interpretationLine(for: inferred))",
+            "Action: \(actionLine(for: action, context: context))",
+            "Next step: Tap \"\(action.rawValue)\"."
+        ]
 
         return AIChatMessage(
             role: .assistant,
-            text: responseText,
+            text: lines.joined(separator: "\n\n"),
             inferredState: inferred,
-            handoff: handoff
+            handoff: action
         )
     }
 
     func inferState(from text: String) -> InferredSupportState {
         let lower = text.lowercased()
 
+        if ["mind racing", "loop", "can't stop thinking", "wired", "switched on"].contains(where: lower.contains) {
+            return .mindRacing
+        }
+        if ["tight", "tense", "clenched", "pain", "restless body"].contains(where: lower.contains) {
+            return .physicalTension
+        }
+        if ["overwhelmed", "too much", "breaking down", "flooded"].contains(where: lower.contains) {
+            return .emotionalOverwhelm
+        }
+        if ["shift", "just got home", "after work", "adrenaline"].contains(where: lower.contains) {
+            return .postShiftStimulation
+        }
+        if ["can't sleep", "another night", "again", "insomnia"].contains(where: lower.contains) {
+            return .insomniaLoop
+        }
         if ["panic", "heart racing", "can't calm", "can't breathe"].contains(where: lower.contains) {
             return .anxious
         }
         if ["tired", "exhausted", "drained", "spent"].contains(where: lower.contains) {
             return .exhausted
-        }
-        if ["sad", "low", "empty", "down"].contains(where: lower.contains) {
-            return .lowMood
-        }
-        if ["tight", "tense", "clenched", "pain"].contains(where: lower.contains) {
-            return .physicallyTense
-        }
-        if ["mind racing", "loop", "can't stop thinking", "wired"].contains(where: lower.contains) {
-            return .activated
         }
 
         return .mixed
@@ -41,47 +50,113 @@ struct PromptBuilder {
 
     private func reflectionLine(for userText: String, inferred: InferredSupportState) -> String {
         switch inferred {
-        case .activated:
-            return "I hear how active your mind feels right now, especially with: “\(userText.trimmingCharacters(in: .whitespacesAndNewlines))”."
-        case .exhausted:
-            return "You sound deeply depleted, and it makes sense that everything feels harder tonight."
+        case .mindRacing:
+            return "It sounds like your body is tired but your mind is still running fast."
+        case .physicalTension:
+            return "You’re describing a body that still feels braced and guarded."
+        case .emotionalOverwhelm:
+            return "I hear how full and heavy this feels right now."
+        case .postShiftStimulation:
+            return "It sounds like you’re still carrying post-shift activation."
+        case .insomniaLoop:
+            return "It sounds like tonight is becoming a familiar sleep-frustration loop."
         case .anxious:
-            return "It sounds like your system is in a surge, and you’re trying to regain control."
-        case .lowMood:
-            return "I hear the weight in what you shared. We can keep this very gentle."
-        case .physicallyTense:
-            return "You’re describing a body that still feels braced. Let’s work with that directly."
+            return "I hear a high-alert surge in what you shared."
+        case .exhausted:
+            return "You sound depleted, like your system has little reserve left."
         case .recovering:
-            return "You’re already shifting in a steadier direction."
+            return "You sound like you’re already beginning to settle."
         case .mixed:
-            return "I hear that tonight feels layered, and we can simplify it to one dependable step."
+            let compact = userText.trimmingCharacters(in: .whitespacesAndNewlines)
+            return "I hear that this feels layered: \"\(compact)\"."
         }
     }
 
-    private func bodyText(for inferred: InferredSupportState, context: CopilotContext) -> String {
-        let stateHint = context.nightState?.title ?? "your current night state"
+    private func interpretationLine(for inferred: InferredSupportState) -> String {
+        switch inferred {
+        case .mindRacing, .postShiftStimulation, .anxious:
+            return "This usually reflects an activated nervous system, not a personal failure to sleep."
+        case .physicalTension:
+            return "This is often a body-protection state where muscles stay switched on."
+        case .emotionalOverwhelm:
+            return "This is likely emotional overload, so we should reduce demands before problem-solving."
+        case .insomniaLoop:
+            return "The pattern itself can become the trigger, so we break the loop with one predictable sequence."
+        case .exhausted:
+            return "Exhaustion plus activation is common; we’ll go for minimum-effort regulation first."
+        case .recovering, .mixed:
+            return "There’s enough signal here to take one stable next step and avoid overthinking."
+        }
+    }
 
+    private func actionLine(for action: AIChatMessage.HandoffAction, context: CopilotContext) -> String {
         switch context.supportDepth {
         case .quiet:
-            return "For \(stateHint): one slow exhale, unclench jaw and shoulders, then hold still for 30 seconds."
+            return quietActionLine(for: action)
         case .steady:
-            return "For \(stateHint), use this sequence: lower stimulation, do one body-settling action, and protect a 5-minute no-decision window."
+            return steadyActionLine(for: action)
         case .deep:
-            let pattern = context.recentPatternSummary ?? "No prior pattern data yet"
-            return "Given \(stateHint), I’d run a 3-part sequence: regulate body first, externalize one unresolved thought, then pick one low-effort anchor.\nPattern cue: \(pattern)."
+            return deepActionLine(for: action, context: context)
         }
     }
 
-    private func handoff(for inferred: InferredSupportState) -> AIChatMessage.HandoffAction {
-        switch inferred {
-        case .anxious:
-            return .launchResetFlow
-        case .lowMood:
-            return .showGroundingPrompt
-        case .activated, .physicallyTense:
-            return .startTimer
-        case .exhausted, .recovering, .mixed:
-            return .launchResetFlow
+    private func quietActionLine(for action: AIChatMessage.HandoffAction) -> String {
+        switch action {
+        case .startTimer:
+            return "Do a 2-minute settle: longer exhales, unclench jaw, eyes soft."
+        case .launchResetFlow:
+            return "Run a short reset to downshift stimulation."
+        case .showGroundingPrompt:
+            return "Read one grounding prompt slowly, twice."
+        case .urgentHelp:
+            return "Pause here and contact urgent support now."
         }
+    }
+
+    private func steadyActionLine(for action: AIChatMessage.HandoffAction) -> String {
+        switch action {
+        case .startTimer:
+            return "Start a 2-minute settle, then reassess tension in shoulders, jaw, and breath pace."
+        case .launchResetFlow:
+            return "Use the reset flow: reduce stimulation, regulate body, then pick one low-effort anchor."
+        case .showGroundingPrompt:
+            return "Use a grounding prompt and pair it with one slow exhale to calm the cognitive load."
+        case .urgentHelp:
+            return "Stop chat and move directly to emergency support steps."
+        }
+    }
+
+    private func deepActionLine(for action: AIChatMessage.HandoffAction, context: CopilotContext) -> String {
+        let pattern = context.recentPatternSummary ?? "No persistent pattern detected yet"
+
+        switch action {
+        case .startTimer:
+            return "Start a 2-minute settle. Then name one body sensation and one thought loop to de-fuse them. Pattern cue: \(pattern)."
+        case .launchResetFlow:
+            return "Run a full reset: sensory downshift, breath pacing, and one closure task. Pattern cue: \(pattern)."
+        case .showGroundingPrompt:
+            return "Use a grounding prompt, then write one sentence: \"Right now I only need to do this next step.\" Pattern cue: \(pattern)."
+        case .urgentHelp:
+            return "Pause all guidance and transition immediately to emergency support."
+        }
+    }
+
+    private func pickAction(for inferred: InferredSupportState, context: CopilotContext) -> AIChatMessage.HandoffAction {
+        let primary: AIChatMessage.HandoffAction
+        switch inferred {
+        case .emotionalOverwhelm:
+            primary = .showGroundingPrompt
+        case .physicalTension, .mindRacing:
+            primary = .startTimer
+        case .postShiftStimulation, .insomniaLoop, .exhausted, .anxious, .mixed, .recovering:
+            primary = .launchResetFlow
+        }
+
+        if context.sessionMemory.wasRecentlySuggested(primary) {
+            let alternatives: [AIChatMessage.HandoffAction] = [.startTimer, .showGroundingPrompt, .launchResetFlow]
+            return alternatives.first(where: { $0 != primary && !context.sessionMemory.wasRecentlySuggested($0) }) ?? primary
+        }
+
+        return primary
     }
 }

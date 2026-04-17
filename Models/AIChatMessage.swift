@@ -8,10 +8,10 @@ struct AIChatMessage: Identifiable, Hashable {
         case system
     }
 
-    enum HandoffAction: String, Hashable {
-        case startTimer = "Start timer"
-        case launchResetFlow = "Launch reset flow"
-        case showGroundingPrompt = "Show grounding prompt"
+    enum HandoffAction: String, Codable, Hashable {
+        case startTimer = "Start 2-minute settle"
+        case launchResetFlow = "Open reset flow"
+        case showGroundingPrompt = "Open grounding prompt"
         case urgentHelp = "Urgent help now"
     }
 
