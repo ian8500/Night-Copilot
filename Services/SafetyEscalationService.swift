@@ -2,14 +2,16 @@ import Foundation
 
 struct SafetyEscalationService {
     private let escalationKeywords: [String] = [
-        "self-harm", "kill myself", "suicide", "can't breathe", "breathing difficulty",
-        "chest pain", "danger", "overdose", "emergency", "hurt myself", "end my life"
+        "self-harm", "hurt myself", "kill myself", "end my life", "suicide",
+        "overdose", "unresponsive", "can't breathe", "cannot breathe", "trouble breathing",
+        "breathing difficulty", "chest pain", "severe distress", "not safe", "unsafe", "emergency"
     ]
 
     func escalationMessageIfNeeded(for text: String, locale: Locale = .current) -> String? {
-        let normalized = text.lowercased()
-        let shouldEscalate = escalationKeywords.contains { normalized.contains($0) }
+        let normalized = text.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return nil }
 
+        let shouldEscalate = escalationKeywords.contains { normalized.contains($0) }
         guard shouldEscalate else { return nil }
 
         let region = locale.regionCode ?? "US"
@@ -34,6 +36,6 @@ struct SafetyEscalationService {
             crisisLine = "Contact your local crisis hotline now"
         }
 
-        return "I’m really glad you reached out. This may be urgent, so pause chat now. \(emergencyLine). If you can, ask someone nearby to stay with you. \(crisisLine)."
+        return "I can’t assess this safely in chat. If you’re having trouble breathing, feel unsafe, or are at risk, pause chat and \(emergencyLine). If possible, ask someone nearby to stay with you. \(crisisLine)."
     }
 }

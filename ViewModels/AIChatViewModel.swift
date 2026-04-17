@@ -15,6 +15,14 @@ final class AIChatViewModel: ObservableObject {
         "Start a reset flow"
     ]
 
+    var nightStateTitle: String {
+        context.nightState?.title ?? "General support"
+    }
+
+    var supportModeSubtitle: String {
+        supportDepth.subtitle
+    }
+
     private var context: CopilotContext
     private let chatService: AIChatService
     private let fallbackService = LocalFallbackSupportService()
@@ -54,7 +62,8 @@ final class AIChatViewModel: ObservableObject {
         let userMessage = AIChatMessage(role: .user, text: trimmed)
         messages.append(userMessage)
 
-        if let escalation = safetyService.escalationMessageIfNeeded(for: trimmed) {
+        let locale = Locale(identifier: context.localeIdentifier)
+        if let escalation = safetyService.escalationMessageIfNeeded(for: trimmed, locale: locale) {
             messages.append(AIChatMessage(role: .safety, text: escalation, handoff: .urgentHelp))
             return
         }

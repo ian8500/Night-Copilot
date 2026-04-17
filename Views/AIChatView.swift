@@ -7,6 +7,7 @@ struct AIChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             modePicker
+            sessionContextCard
 
             ScrollViewReader { proxy in
                 ScrollView {
@@ -60,6 +61,40 @@ struct AIChatView: View {
             Spacer()
         }
         .padding(Spacing.medium)
+    }
+
+
+    private var sessionContextCard: some View {
+        HStack(alignment: .center, spacing: Spacing.small) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(viewModel.nightStateTitle)
+                    .font(Typography.caption.weight(.semibold))
+                    .foregroundStyle(Color.textPrimary)
+                Text(viewModel.supportModeSubtitle)
+                    .font(Typography.micro)
+                    .foregroundStyle(Color.textSecondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "moon.zzz.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.secondaryAccent)
+                .padding(8)
+                .background(Circle().fill(Color.white.opacity(0.05)))
+        }
+        .padding(.horizontal, Spacing.medium)
+        .padding(.vertical, Spacing.small)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, Spacing.medium)
+        .padding(.bottom, Spacing.xSmall)
     }
 
     private func messageBubble(_ message: AIChatMessage) -> some View {
