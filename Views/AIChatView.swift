@@ -30,8 +30,12 @@ struct AIChatView: View {
                 }
             }
 
-            quickReplies
-            composer
+            if !viewModel.isEscalated {
+                quickReplies
+                composer
+            } else {
+                escalationFooter
+            }
         }
         .background(LinearGradient.appBackground.ignoresSafeArea())
         .navigationTitle("Copilot Chat")
@@ -39,23 +43,39 @@ struct AIChatView: View {
     }
 
     private var modePicker: some View {
-        HStack(spacing: Spacing.xSmall) {
-            ForEach(SupportDepthMode.allCases) { mode in
-                Button(mode.title) {
-                    viewModel.setDepth(mode)
+        VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+            Text("Response mode")
+                .font(Typography.micro.weight(.semibold))
+                .foregroundStyle(Color.textSecondary)
+
+            HStack(spacing: Spacing.xSmall) {
+                ForEach(SupportDepthMode.allCases) { mode in
+                    Button {
+                        viewModel.setDepth(mode)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(mode.title)
+                                .font(Typography.caption.weight(.semibold))
+                            Text(mode.subtitle)
+                                .font(Typography.micro)
+                                .lineLimit(1)
+                        }
+                        .foregroundStyle(viewModel.supportDepth == mode ? Color.nightBackground : Color.textPrimary)
+                        .padding(.horizontal, Spacing.small)
+                        .padding(.vertical, Spacing.xSmall)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(viewModel.supportDepth == mode ? Color.secondaryAccent : Color.white.opacity(0.06))
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .font(Typography.caption.weight(.semibold))
-                .foregroundStyle(viewModel.supportDepth == mode ? Color.nightBackground : Color.textPrimary)
-                .padding(.horizontal, Spacing.small)
-                .padding(.vertical, Spacing.xSmall)
-                .background(
-                    Capsule()
-                        .fill(viewModel.supportDepth == mode ? Color.secondaryAccent : Color.white.opacity(0.08))
-                )
             }
-            Spacer()
         }
-        .padding(Spacing.medium)
+        .padding(.horizontal, Spacing.medium)
+        .padding(.top, Spacing.medium)
+        .padding(.bottom, Spacing.small)
     }
 
     private func messageBubble(_ message: AIChatMessage) -> some View {
@@ -90,9 +110,24 @@ struct AIChatView: View {
             }
 
             if let handoff = message.handoff, message.role != .user {
-                Text("Handoff: \(handoff.rawValue)")
-                    .font(Typography.micro)
-                    .foregroundStyle(handoff == .urgentHelp ? Color.safetyAccent : Color.secondaryAccent)
+                Button {
+                    viewModel.performHandoff(handoff)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: handoff == .urgentHelp ? "phone.fill" : "bolt.fill")
+                        Text(handoff.rawValue)
+                            .font(Typography.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(Color.textPrimary)
+                    .padding(.horizontal, Spacing.small)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(handoff == .urgentHelp ? Color.safetyAccent : Color.primaryAccent)
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(viewModel.isEscalated && handoff != .urgentHelp)
             }
         }
     }
@@ -165,6 +200,20 @@ struct AIChatView: View {
             .disabled(viewModel.isSending)
         }
         .padding(Spacing.medium)
+    }
+
+    private var escalationFooter: some View {
+        VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+            Text("Safety mode active")
+                .font(Typography.caption.weight(.semibold))
+                .foregroundStyle(Color.safetyAccent)
+            Text("Normal chat is paused. Use urgent support options now.")
+                .font(Typography.micro)
+                .foregroundStyle(Color.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.medium)
+        .background(Color.safetyBubble.opacity(0.5))
     }
 
     private func backgroundColor(for role: AIChatMessage.Role) -> Color {

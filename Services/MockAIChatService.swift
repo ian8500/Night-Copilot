@@ -6,41 +6,35 @@ struct MockAIChatService: AIChatService {
     func reply(to userText: String, context: CopilotContext, history: [AIChatMessage]) async throws -> AIChatMessage {
         try await Task.sleep(for: .milliseconds(250))
 
-        // Simulate occasional AI downtime and enforce local fallback from VM
         if userText.lowercased().contains("service down") {
             throw URLError(.cannotConnectToHost)
         }
 
-        var response = builder.buildResponse(userText: userText, context: context)
-        let memoryReference = memoryAwareLine(history: history, depth: context.supportDepth)
+        let response = builder.buildResponse(userText: userText, context: context)
+        let listeningCue = listeningMemoryLine(context: context)
 
-        if !memoryReference.isEmpty {
-            response = AIChatMessage(
-                role: .assistant,
-                text: response.text + "\n\n" + memoryReference,
-                inferredState: response.inferredState,
-                handoff: response.handoff
-            )
-        }
-
-        return response
+        return AIChatMessage(
+            role: .assistant,
+            text: response.text + "\n\n" + listeningCue,
+            inferredState: response.inferredState,
+            handoff: response.handoff
+        )
     }
 
-    private func memoryAwareLine(history: [AIChatMessage], depth: SupportDepthMode) -> String {
-        let userTurns = history.filter { $0.role == .user }
-        guard let latest = userTurns.last?.text else { return "" }
+    private func listeningMemoryLine(context: CopilotContext) -> String {
+        let memory = context.sessionMemory.recentInputSummaries.suffix(3)
+        guard !memory.isEmpty else {
+            return "I’m listening in real time and adapting as we go."
+        }
 
-        switch depth {
+        let condensed = memory.joined(separator: " • ")
+        switch context.supportDepth {
         case .quiet:
-            return "I’m tracking this with you."
+            return "Tracking: \(condensed)."
         case .steady:
-            return "I’m holding onto what you said most recently: \"\(latest)\"."
+            return "What I’m tracking from this session: \(condensed)."
         case .deep:
-            let previous = userTurns.dropLast().last?.text
-            if let previous {
-                return "I’m noticing continuity between \"\(previous)\" and \"\(latest)\", which suggests this is a repeating loop tonight."
-            }
-            return "I’m keeping in-session memory so you don’t need to repeat yourself."
+            return "Session pattern I’m following: \(condensed). I’ll avoid repeating the same intervention if it isn’t helping."
         }
     }
 }
