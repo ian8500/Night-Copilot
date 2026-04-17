@@ -2,27 +2,29 @@ import SwiftUI
 
 struct NightCard<Content: View>: View {
     let content: Content
+    var padding: CGFloat
 
-    init(@ViewBuilder content: () -> Content) {
+    init(padding: CGFloat = Spacing.large, @ViewBuilder content: () -> Content) {
         self.content = content()
+        self.padding = padding
     }
 
     var body: some View {
         content
-            .padding(Spacing.large)
+            .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(Color.cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .fill(LinearGradient.heroGlow)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(LinearGradient.cinematicGlow)
+                    }
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
                             .stroke(Color.cardStroke, lineWidth: 1)
-                    )
-                    .shadow(color: .black.opacity(0.3), radius: 16, y: 10)
+                    }
+                    .shadow(color: Color.black.opacity(0.45), radius: 20, y: 14)
             )
     }
 }
@@ -30,7 +32,7 @@ struct NightCard<Content: View>: View {
 #Preview {
     NightCard {
         Text("Preview card")
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.textPrimary)
     }
     .padding()
     .background(LinearGradient.appBackground)

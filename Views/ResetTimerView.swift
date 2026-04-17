@@ -10,11 +10,11 @@ struct ResetTimerView: View {
             VStack(spacing: Spacing.small) {
                 Text(viewModel.tool.title)
                     .font(Typography.sectionTitle)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.textPrimary)
 
                 Text(viewModel.tool.guidanceText)
                     .font(Typography.body)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(Color.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Spacing.large)
             }
@@ -25,12 +25,12 @@ struct ResetTimerView: View {
                 VStack(spacing: Spacing.xxSmall) {
                     Text(TimeFormatter.mmss(from: viewModel.remaining))
                         .font(Typography.timer)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.textPrimary)
                         .monospacedDigit()
 
                     Text(viewModel.isRunning ? "steady pace" : "ready when you are")
                         .font(Typography.caption.weight(.semibold))
-                        .foregroundStyle(Color.secondaryText)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .scaleEffect(animateBreath ? 1.01 : 0.99)
@@ -50,7 +50,7 @@ struct ResetTimerView: View {
                 dismiss()
             }
             .font(Typography.caption.weight(.semibold))
-            .foregroundStyle(Color.secondaryText)
+            .foregroundStyle(Color.textSecondary)
 
             Spacer(minLength: 0)
         }
@@ -66,12 +66,12 @@ struct ResetTimerView: View {
         Button(action: action) {
             Text(title)
                 .font(Typography.actionButton)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.medium)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(primary ? Color.mutedIndigo : Color.white.opacity(0.10))
+                        .fill(primary ? Color.primaryAccent : Color.white.opacity(0.10))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .stroke(Color.white.opacity(primary ? 0 : 0.16), lineWidth: 1)

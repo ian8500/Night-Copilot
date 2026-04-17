@@ -8,36 +8,36 @@ struct QuickActionChip: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxSmall) {
                 HStack(spacing: 6) {
                     Text(title)
                         .font(Typography.caption.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.textPrimary)
 
                     if access == .premium {
-                        Label("Plus", systemImage: "lock.fill")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color.black.opacity(0.85))
-                            .padding(.horizontal, 6)
+                        Text("PREMIUM")
+                            .font(Typography.micro.weight(.bold))
+                            .foregroundStyle(Color.nightBackground)
+                            .padding(.horizontal, 7)
                             .padding(.vertical, 3)
-                            .background(Capsule().fill(Color.yellow.opacity(0.9)))
+                            .background(Capsule().fill(Color.secondaryAccent))
                     }
                 }
 
                 if let subtitle {
                     Text(subtitle)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundStyle(Color.secondaryText)
+                        .font(Typography.micro)
+                        .foregroundStyle(Color.textSecondary)
                 }
             }
             .padding(.horizontal, Spacing.medium)
             .padding(.vertical, 10)
             .background(
                 Capsule(style: .continuous)
-                    .fill(access == .premium ? Color.elevatedCardBackground.opacity(0.9) : Color.white.opacity(0.08))
+                    .fill(access == .premium ? Color.elevatedCardBackground : Color.white.opacity(0.05))
                     .overlay(
                         Capsule(style: .continuous)
-                            .stroke(access == .premium ? Color.yellow.opacity(0.5) : Color.white.opacity(0.16), lineWidth: 1)
+                            .stroke(access == .premium ? Color.secondaryAccent.opacity(0.6) : Color.white.opacity(0.14), lineWidth: 1)
                     )
             )
         }

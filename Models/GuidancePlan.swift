@@ -24,69 +24,101 @@ struct GuidancePlan: Identifiable {
 
     static func makePlan(for state: NightState) -> GuidancePlan {
         switch state {
-        case .cantSleep:
-            return GuidancePlan(
+        case .cantSwitchOff:
+            return .init(
                 nightState: state,
                 steps: [
-                    "Put the phone down for a few seconds and unclench your jaw and shoulders.",
-                    "Slow your breathing for one minute without trying to control the whole night.",
-                    "If sleep does not return, switch to a quiet reset rather than getting frustrated."
+                    "Lower stimulation first: dim light and pause scrolling.",
+                    "Exhale longer than you inhale for one minute.",
+                    "Choose one anchor: stillness, breath, or gentle audio."
                 ],
                 quickActions: [
-                    .init(title: "Start breathing timer", subtitle: "1 minute", access: .free, action: .startTool(.breathing1m)),
-                    .init(title: "Read a calm prompt", subtitle: "Ground now", access: .free, action: .readPrompt),
-                    .init(title: "Sleep return script", subtitle: "8-minute guided session", access: .premium, action: .openPremiumPreview)
+                    .init(title: "Start 1-minute breathing", subtitle: "Immediate", access: .free, action: .startTool(.breathing1m)),
+                    .init(title: "Grounding prompt", subtitle: "Refocus", access: .free, action: .readPrompt),
+                    .init(title: "Panic-light journey", subtitle: "5-stage support", access: .premium, action: .openPremiumPreview)
                 ],
-                primaryActionTitle: "Start quiet reset",
-                primaryTool: .quiet5m
-            )
-        case .wiredAfterWork:
-            return GuidancePlan(
-                nightState: state,
-                steps: [
-                    "Lower light and stop stimulating input now.",
-                    "Do one short wind-down action instead of several.",
-                    "Let your system step down gradually instead of trying to crash into sleep."
-                ],
-                quickActions: [
-                    .init(title: "Start 10-minute wind-down", subtitle: "Core tool", access: .free, action: .startTool(.windDown10m)),
-                    .init(title: "Read recovery steps", subtitle: "Keep it simple", access: .free, action: .readPrompt),
-                    .init(title: "After-work decompression", subtitle: "Structured unwind", access: .premium, action: .openPremiumPreview)
-                ],
-                primaryActionTitle: "Begin wind-down",
-                primaryTool: .windDown10m
-            )
-        case .feelingOverwhelmed:
-            return GuidancePlan(
-                nightState: state,
-                steps: [
-                    "Pause and take one slower breath than usual.",
-                    "Pick one immediate need: quiet, water, warmth, or rest.",
-                    "Do the smallest helpful action first."
-                ],
-                quickActions: [
-                    .init(title: "Start 60-second reset", subtitle: "Fast relief", access: .free, action: .startTool(.reset60)),
-                    .init(title: "Read grounding prompt", subtitle: "Steady your thoughts", access: .free, action: .readPrompt),
-                    .init(title: "Overload recovery plan", subtitle: "5-step guide", access: .premium, action: .openPremiumPreview)
-                ],
-                primaryActionTitle: "Start reset",
+                primaryActionTitle: "Help me settle now",
                 primaryTool: .reset60
             )
-        case .needToReset:
-            return GuidancePlan(
+        case .mindRacing:
+            return .init(
                 nightState: state,
                 steps: [
-                    "Sit or lie somewhere comfortable.",
-                    "Reduce noise, brightness, and decision-making.",
-                    "Follow one short reset instead of trying to fix everything."
+                    "Name the loop in one short sentence.",
+                    "Move one unresolved item to tomorrow.",
+                    "Return to body: jaw loose, shoulders soft, long exhale."
                 ],
                 quickActions: [
-                    .init(title: "Start 5-minute reset", subtitle: "Core tool", access: .free, action: .startTool(.quiet5m)),
-                    .init(title: "Read a calming prompt", subtitle: "Reset focus", access: .free, action: .readPrompt),
-                    .init(title: "Night reflection", subtitle: "Guided journal", access: .premium, action: .openPremiumPreview)
+                    .init(title: "Start 5-minute quiet", subtitle: "Stop cognitive load", access: .free, action: .startTool(.quiet5m)),
+                    .init(title: "Mind racing journey", subtitle: "4-stage support", access: .free, action: .readPrompt),
+                    .init(title: "Deep guided decompression", subtitle: "Premium", access: .premium, action: .openPremiumPreview)
                 ],
-                primaryActionTitle: "Start 5-minute reset",
+                primaryActionTitle: "Launch mental reset",
                 primaryTool: .quiet5m
+            )
+        case .bodyTense:
+            return .init(
+                nightState: state,
+                steps: [
+                    "Unclench hands, jaw, and stomach deliberately.",
+                    "Drop temperature or use a cool cue on wrists.",
+                    "Run two minutes of longer exhales."
+                ],
+                quickActions: [
+                    .init(title: "60-second body reset", subtitle: "Fast calm", access: .free, action: .startTool(.reset60)),
+                    .init(title: "Read body prompt", subtitle: "Physical cue", access: .free, action: .readPrompt),
+                    .init(title: "Tension unwind script", subtitle: "Premium flow", access: .premium, action: .openPremiumPreview)
+                ],
+                primaryActionTitle: "Start physical downshift",
+                primaryTool: .breathing1m
+            )
+        case .feelingLow:
+            return .init(
+                nightState: state,
+                steps: [
+                    "Reduce demands: one task only for the next 10 minutes.",
+                    "Choose one comfort action: warmth, hydration, or softer light.",
+                    "Use Copilot Deep mode for a guided gentle check-in."
+                ],
+                quickActions: [
+                    .init(title: "Start gentle pause", subtitle: "No pressure", access: .free, action: .startTool(.quiet5m)),
+                    .init(title: "Read compassionate prompt", subtitle: "Stabilize", access: .free, action: .readPrompt),
+                    .init(title: "Mood stabilization journey", subtitle: "Premium", access: .premium, action: .openPremiumPreview)
+                ],
+                primaryActionTitle: "Begin low-pressure reset",
+                primaryTool: .quiet5m
+            )
+        case .wokeUpAlert:
+            return .init(
+                nightState: state,
+                steps: [
+                    "Do not check the time.",
+                    "Tell yourself: rest counts even before sleep.",
+                    "Shift from solving to settling for five minutes."
+                ],
+                quickActions: [
+                    .init(title: "Back-to-sleep flow", subtitle: "4 stages", access: .free, action: .readPrompt),
+                    .init(title: "1-minute breathing", subtitle: "Lower alertness", access: .free, action: .startTool(.breathing1m)),
+                    .init(title: "Night replay insights", subtitle: "Premium", access: .premium, action: .openPremiumPreview)
+                ],
+                primaryActionTitle: "Return to rest mode",
+                primaryTool: .breathing1m
+            )
+        case .afterHardShift:
+            return .init(
+                nightState: state,
+                steps: [
+                    "Say out loud that your shift is over.",
+                    "Release body armor: shoulders down, hands soft.",
+                    "Use a structured decompression sequence, not random steps."
+                ],
+                quickActions: [
+                    .init(title: "10-minute wind-down", subtitle: "Structured", access: .free, action: .startTool(.windDown10m)),
+                    .init(title: "Decompression prompt", subtitle: "Transition", access: .free, action: .readPrompt),
+                    .init(title: "After-shift journey", subtitle: "Premium+", access: .premium, action: .openPremiumPreview)
+                ],
+                primaryActionTitle: "Run decompression now",
+                primaryTool: .windDown10m
             )
         }
     }

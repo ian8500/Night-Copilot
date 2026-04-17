@@ -9,18 +9,18 @@ struct PremiumTierSheet: View {
             VStack(alignment: .leading, spacing: Spacing.large) {
                 Text(title)
                     .font(Typography.cardTitle)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.textPrimary)
 
                 Text(subtitle)
                     .font(Typography.body)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(Color.textSecondary)
 
                 tierBlock(title: "Included in Free", features: TierCatalog.freeFeatures)
                 tierBlock(title: "Night Copilot Plus (Preview)", features: TierCatalog.premiumFeatures)
 
                 Text("No pressure: your current tools remain fully usable without upgrading.")
                     .font(Typography.caption.weight(.semibold))
-                    .foregroundStyle(Color.tertiaryText)
+                    .foregroundStyle(Color.textSecondary)
             }
             .padding(Spacing.large)
         }
@@ -32,22 +32,22 @@ struct PremiumTierSheet: View {
             VStack(alignment: .leading, spacing: Spacing.small) {
                 Text(title)
                     .font(Typography.sectionLabel)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(Color.textSecondary)
 
                 ForEach(features) { feature in
                     HStack(alignment: .top, spacing: Spacing.small) {
                         Image(systemName: feature.tier == .free ? "checkmark.circle.fill" : "sparkles")
-                            .foregroundStyle(feature.tier == .free ? Color.accentGlow : Color.yellow.opacity(0.85))
+                            .foregroundStyle(feature.tier == .free ? Color.glowAccent : Color.secondaryAccent)
                             .padding(.top, 2)
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(feature.title)
-                                .font(Typography.body.weight(.semibold))
-                                .foregroundStyle(.white)
+                                .font(Typography.bodyStrong)
+                                .foregroundStyle(Color.textPrimary)
 
                             Text(feature.detail)
                                 .font(Typography.caption)
-                                .foregroundStyle(Color.secondaryText)
+                                .foregroundStyle(Color.textSecondary)
                         }
                     }
                 }

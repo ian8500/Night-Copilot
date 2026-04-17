@@ -5,25 +5,40 @@ final class AIChatViewModel: ObservableObject {
     @Published var messages: [AIChatMessage] = []
     @Published var inputText = ""
     @Published var isSending = false
+    @Published var supportDepth: SupportDepthMode
 
     let quickReplies = [
-        "What’s the next best step?",
-        "Keep this very short",
-        "I need something calming",
-        "What if this doesn’t help?",
-        "Start a reset timer"
+        "Help me settle now",
+        "Keep this short",
+        "My mind is racing",
+        "I woke up alert",
+        "Start a reset flow"
     ]
 
-    private let context: CopilotContext
+    private var context: CopilotContext
     private let chatService: AIChatService
+    private let fallbackService = LocalFallbackSupportService()
     private let safetyService = SafetyEscalationService()
+    private let memoryStore: NightMemoryStore?
 
-    init(context: CopilotContext, chatService: AIChatService = MockAIChatService()) {
+    init(
+        context: CopilotContext,
+        chatService: AIChatService = MockAIChatService(),
+        memoryStore: NightMemoryStore? = nil
+    ) {
         self.context = context
         self.chatService = chatService
+        self.memoryStore = memoryStore
+        self.supportDepth = context.supportDepth
 
-        let welcome = "I’m here with calm, practical support. Tell me what feels hardest right now, and we’ll take one step at a time."
+        let welcome = "I’m here. I’ll listen first, then give one clear next step. Choose Quiet, Steady, or Deep at any time."
         messages = [AIChatMessage(role: .assistant, text: welcome)]
+    }
+
+    func setDepth(_ depth: SupportDepthMode) {
+        supportDepth = depth
+        context.supportDepth = depth
+        memoryStore?.setPreferredDepth(depth)
     }
 
     func send(_ text: String? = nil) async {
@@ -32,16 +47,30 @@ final class AIChatViewModel: ObservableObject {
 
         inputText = ""
         isSending = true
-        messages.append(AIChatMessage(role: .user, text: trimmed))
+
+        let userMessage = AIChatMessage(role: .user, text: trimmed)
+        messages.append(userMessage)
 
         if let escalation = safetyService.escalationMessageIfNeeded(for: trimmed) {
-            messages.append(AIChatMessage(role: .safety, text: escalation))
+            messages.append(AIChatMessage(role: .safety, text: escalation, handoff: .urgentHelp))
             isSending = false
             return
         }
 
-        let reply = await chatService.reply(to: trimmed, context: context)
-        messages.append(reply)
+        context.supportDepth = supportDepth
+        context.recentPatternSummary = memoryStore?.patternSummary
+        if let inferred = PromptBuilder().buildResponse(userText: trimmed, context: context).inferredState {
+            context.sessionMemory.append(SessionMemoryItem(timestamp: .now, userSummary: trimmed, inferredState: inferred))
+        }
+
+        do {
+            let reply = try await chatService.reply(to: trimmed, context: context, history: messages)
+            messages.append(reply)
+        } catch {
+            let fallback = fallbackService.fallbackResponse(for: context, userText: trimmed)
+            messages.append(fallback)
+        }
+
         isSending = false
     }
 }

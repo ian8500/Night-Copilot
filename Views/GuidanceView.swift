@@ -23,11 +23,11 @@ struct GuidanceView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Open Copilot") {
+                Button("Talk to Copilot") {
                     isShowingCopilot = true
                 }
                 .font(Typography.caption.weight(.semibold))
-                .foregroundStyle(Color.accentGlow)
+                .foregroundStyle(Color.glowAccent)
             }
         }
         .sheet(item: $activeTool) { tool in
@@ -42,7 +42,7 @@ struct GuidanceView: View {
         .sheet(isPresented: $isShowingPremiumSheet) {
             PremiumTierSheet(
                 title: "Night Copilot Plus",
-                subtitle: "Preview deeper recovery sessions while your free nighttime essentials stay available."
+                subtitle: "Deeper journeys and replay intelligence with local-first privacy."
             )
             .presentationDetents([.medium, .large])
         }
@@ -51,7 +51,8 @@ struct GuidanceView: View {
                 viewModel: AIChatViewModel(
                     context: CopilotContext(
                         nightState: viewModel.plan.nightState,
-                        currentPrompt: viewModel.selectedPrompt
+                        currentPrompt: viewModel.selectedPrompt,
+                        supportDepth: .steady
                     )
                 )
             )
@@ -61,13 +62,13 @@ struct GuidanceView: View {
     private var titleBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
-                Text("Plan for right now")
+                Text("Immediate mode")
                     .font(Typography.sectionLabel)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(Color.textSecondary)
 
                 Text(viewModel.plan.nightState.openingLine)
                     .font(Typography.body)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.textPrimary)
             }
         }
     }
@@ -75,19 +76,19 @@ struct GuidanceView: View {
     private var stepsBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.medium) {
-                Text("Steady next steps (Free)")
+                Text("Steady next steps")
                     .font(Typography.sectionLabel)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(Color.textSecondary)
 
                 ForEach(Array(viewModel.plan.steps.enumerated()), id: \.offset) { index, step in
                     HStack(alignment: .top, spacing: Spacing.small) {
                         Text("\(index + 1).")
-                            .font(Typography.body.weight(.semibold))
-                            .foregroundStyle(Color.accentGlow)
+                            .font(Typography.bodyStrong)
+                            .foregroundStyle(Color.secondaryAccent)
 
                         Text(step)
                             .font(Typography.body)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -98,9 +99,9 @@ struct GuidanceView: View {
     private var quickActionsBlock: some View {
         NightCard {
             VStack(alignment: .leading, spacing: Spacing.small) {
-                Text("Shortcuts")
+                Text("Tools")
                     .font(Typography.sectionLabel)
-                    .foregroundStyle(Color.secondaryText)
+                    .foregroundStyle(Color.textSecondary)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: Spacing.small) {
@@ -121,16 +122,17 @@ struct GuidanceView: View {
 
     private var primaryButton: some View {
         Button {
+            viewModel.recordToolUse(viewModel.plan.primaryTool)
             activeTool = viewModel.plan.primaryTool
         } label: {
             Text(viewModel.plan.primaryActionTitle)
                 .font(Typography.actionButton)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.medium)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color.mutedIndigo)
+                        .fill(Color.primaryAccent)
                 )
         }
         .buttonStyle(.plain)
@@ -141,17 +143,17 @@ struct GuidanceView: View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
             Text("Grounding prompt")
                 .font(Typography.cardTitle)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.textPrimary)
 
             Text(viewModel.selectedPrompt.text)
                 .font(Typography.body)
-                .foregroundStyle(Color.secondaryText)
+                .foregroundStyle(Color.textSecondary)
 
             Button("Show another") {
                 viewModel.cyclePrompt()
             }
             .font(Typography.actionButton)
-            .foregroundStyle(Color.accentGlow)
+            .foregroundStyle(Color.glowAccent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(Spacing.large)
@@ -161,8 +163,10 @@ struct GuidanceView: View {
     private func handleQuickAction(_ action: GuidancePlan.QuickAction.ActionType) {
         switch action {
         case .startTool(let tool):
+            viewModel.recordToolUse(tool)
             activeTool = tool
         case .readPrompt:
+            viewModel.recordFlowHelp(viewModel.plan.nightState.title)
             isShowingPrompt = true
         case .openPremiumPreview:
             isShowingPremiumSheet = true
@@ -172,6 +176,6 @@ struct GuidanceView: View {
 
 #Preview {
     NavigationStack {
-        GuidanceView(viewModel: GuidanceViewModel(state: .cantSleep))
+        GuidanceView(viewModel: GuidanceViewModel(state: .cantSwitchOff))
     }
 }
