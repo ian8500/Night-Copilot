@@ -1,6 +1,6 @@
 import Foundation
 
-enum ResetTool: String, CaseIterable, Identifiable {
+enum ResetTool: String, CaseIterable, Identifiable, Codable {
     case reset60
     case breathing1m
     case quiet5m
@@ -13,11 +13,11 @@ enum ResetTool: String, CaseIterable, Identifiable {
         case .reset60:
             return "60-second pause"
         case .breathing1m:
-            return "1-minute breathing"
+            return "1-minute breath downshift"
         case .quiet5m:
-            return "5-minute quiet"
+            return "5-minute quiet floor"
         case .windDown10m:
-            return "10-minute wind-down"
+            return "10-minute transition"
         }
     }
 
@@ -35,13 +35,13 @@ enum ResetTool: String, CaseIterable, Identifiable {
     var guidanceText: String {
         switch self {
         case .reset60:
-            return "One minute. Fewer decisions. Slower breathing."
+            return "One minute. Reduce input. Lengthen exhale."
         case .breathing1m:
-            return "Inhale gently, exhale longer, and let your shoulders soften."
+            return "Gentle inhale, longer exhale. Let your shoulders drop."
         case .quiet5m:
-            return "No solving for now. Just five quiet minutes to settle."
+            return "No solving. Just five minutes of nervous-system quiet."
         case .windDown10m:
-            return "Lower stimulation and give your nervous system room to power down."
+            return "Move from performance mode into recovery mode."
         }
     }
 }

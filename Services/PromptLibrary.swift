@@ -3,15 +3,16 @@ import Foundation
 enum PromptLibrary {
     static let prompts: [CalmPrompt] = [
         CalmPrompt(text: "You do not need to solve the whole night at once."),
-        CalmPrompt(text: "Small, quiet steps are enough right now."),
-        CalmPrompt(text: "Rest can begin before sleep does."),
-        CalmPrompt(text: "Tired minds need fewer choices, not more."),
-        CalmPrompt(text: "Do the next kind thing, not every thing.")
+        CalmPrompt(text: "Lower the pace first, then choose one useful next action."),
+        CalmPrompt(text: "Rest can begin before sleep begins."),
+        CalmPrompt(text: "Small boundaries create calm quickly."),
+        CalmPrompt(text: "Let this minute be enough for now."),
+        CalmPrompt(text: "You are allowed to downshift without finishing everything.")
     ]
 
     static func anchorPrompt(for date: Date = .now) -> CalmPrompt {
         guard !prompts.isEmpty else {
-            return CalmPrompt(text: "Slow down. One steady breath is enough for this moment.")
+            return CalmPrompt(text: "One slower breath is a complete next step.")
         }
 
         let day = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 0

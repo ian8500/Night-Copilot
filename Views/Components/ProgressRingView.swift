@@ -20,17 +20,17 @@ struct ProgressRingView: View {
                 .trim(from: 0, to: progress)
                 .stroke(
                     AngularGradient(
-                        colors: [Color.accentGlow, Color.mutedIndigo, Color.accentGlow.opacity(0.85)],
+                        colors: [Color.glowAccent, Color.primaryAccent, Color.secondaryAccent],
                         center: .center
                     ),
                     style: StrokeStyle(lineWidth: 12, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
-                .shadow(color: Color.accentGlow.opacity(0.45), radius: 8)
+                .shadow(color: Color.glowAccent.opacity(0.45), radius: 8)
                 .animation(.easeInOut(duration: 0.5), value: progress)
 
             Circle()
-                .fill(Color.accentGlow.opacity(0.18))
+                .fill(Color.glowAccent.opacity(0.18))
                 .padding(40)
                 .scaleEffect(isAnimating ? 1.02 : 0.97)
                 .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: isAnimating)
