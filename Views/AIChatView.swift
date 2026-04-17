@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AIChatView: View {
     @StateObject var viewModel: AIChatViewModel
+    @FocusState private var isComposerFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,6 +14,7 @@ struct AIChatView: View {
                         ForEach(viewModel.messages) { message in
                             messageBubble(message)
                                 .id(message.id)
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
                         }
 
                         if viewModel.isSending {
@@ -52,6 +54,8 @@ struct AIChatView: View {
                     Capsule()
                         .fill(viewModel.supportDepth == mode ? Color.secondaryAccent : Color.white.opacity(0.08))
                 )
+                .accessibilityLabel("\(mode.title) support mode")
+                .accessibilityHint(mode.subtitle)
             }
             Spacer()
         }
@@ -95,6 +99,7 @@ struct AIChatView: View {
                     .foregroundStyle(handoff == .urgentHelp ? Color.safetyAccent : Color.secondaryAccent)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 
     private var typingIndicator: some View {
@@ -119,6 +124,7 @@ struct AIChatView: View {
             .foregroundStyle(.white)
             .frame(width: 22, height: 22)
             .background(Circle().fill(backgroundColor(for: role).opacity(0.95)))
+            .accessibilityHidden(true)
     }
 
     private var quickReplies: some View {
@@ -138,7 +144,7 @@ struct AIChatView: View {
     private var composer: some View {
         HStack(spacing: Spacing.small) {
             TextField("Tell Copilot what’s hardest right now…", text: $viewModel.inputText, axis: .vertical)
-                .lineLimit(1...4)
+                .lineLimit(1 ... 4)
                 .font(Typography.body)
                 .foregroundStyle(Color.textPrimary)
                 .padding(.horizontal, Spacing.medium)
@@ -151,6 +157,11 @@ struct AIChatView: View {
                                 .stroke(Color.white.opacity(0.12), lineWidth: 1)
                         )
                 )
+                .focused($isComposerFocused)
+                .submitLabel(.send)
+                .onSubmit {
+                    Task { await viewModel.send() }
+                }
 
             Button {
                 Task { await viewModel.send() }
@@ -162,9 +173,15 @@ struct AIChatView: View {
                     .background(Circle().fill(Color.primaryAccent))
             }
             .buttonStyle(.plain)
-            .disabled(viewModel.isSending)
+            .disabled(viewModel.isSending || viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .accessibilityLabel("Send message")
         }
         .padding(Spacing.medium)
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial.opacity(0.15))
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 
     private func backgroundColor(for role: AIChatMessage.Role) -> Color {

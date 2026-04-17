@@ -42,26 +42,28 @@ final class AIChatViewModel: ObservableObject {
     }
 
     func send(_ text: String? = nil) async {
-        let trimmed = (text ?? inputText).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !isSending else { return }
+
+        let trimmed = sanitizeInput(text ?? inputText)
         guard !trimmed.isEmpty else { return }
 
         inputText = ""
         isSending = true
+        defer { isSending = false }
 
         let userMessage = AIChatMessage(role: .user, text: trimmed)
         messages.append(userMessage)
 
         if let escalation = safetyService.escalationMessageIfNeeded(for: trimmed) {
             messages.append(AIChatMessage(role: .safety, text: escalation, handoff: .urgentHelp))
-            isSending = false
             return
         }
 
         context.supportDepth = supportDepth
         context.recentPatternSummary = memoryStore?.patternSummary
-        if let inferred = PromptBuilder().buildResponse(userText: trimmed, context: context).inferredState {
-            context.sessionMemory.append(SessionMemoryItem(timestamp: .now, userSummary: trimmed, inferredState: inferred))
-        }
+
+        let inferred = PromptBuilder().buildResponse(userText: trimmed, context: context).inferredState
+        context.sessionMemory.append(SessionMemoryItem(timestamp: .now, userSummary: trimmed, inferredState: inferred))
 
         do {
             let reply = try await chatService.reply(to: trimmed, context: context, history: messages)
@@ -70,7 +72,15 @@ final class AIChatViewModel: ObservableObject {
             let fallback = fallbackService.fallbackResponse(for: context, userText: trimmed)
             messages.append(fallback)
         }
+    }
 
-        isSending = false
+    private func sanitizeInput(_ value: String) -> String {
+        let compact = value
+            .replacingOccurrences(of: "\n{3,}", with: "\n\n", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let maxLength = 700
+        guard compact.count > maxLength else { return compact }
+        return String(compact.prefix(maxLength))
     }
 }
